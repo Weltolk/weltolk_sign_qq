@@ -1,0 +1,2 @@
+# weltolk_sign_qq
+每日用户签到结果qq推送，目前支持go-cqhttp的正向WebSocket和HTTP API，基于D丶L和quericy的版本重写
