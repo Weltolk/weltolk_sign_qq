@@ -3,7 +3,40 @@
 }
 loadhead();
 global $i, $m;
+$is_open = option::uget('weltolk_sign_qq_enable', UID);
+if (!$is_open) {
+    option::uset('weltolk_sign_qq_enable', 'on', UID);
+    $is_open = true;
+} else {
+    if ($is_open == "on") {
+        $is_open = true;
+    } else if ($is_open == "off") {
+        $is_open = false;
+    }
+}
 $page = $_GET['page'];
+if ($page == 'user_settings') {
+    $act = $_GET['act'];
+
+    //保存用户设置
+    if ($act == 'store') {
+        ob_end_clean();
+        $data = json_decode($_POST['info'], true);
+        $cache_weltolk_sign_qq_enable = "";
+        if (!empty($data['weltolk_sign_qq_enable'])) {
+            $cache_weltolk_sign_qq_enable = addslashes(strip_tags($data['weltolk_sign_qq_enable']));
+        }
+        if (empty($cache_weltolk_sign_qq_enable)
+        ) {
+            $return_arr = array('code' => 0, 'msg' => '无效请求!');
+        } else {
+            option::uset('weltolk_sign_qq_enable', $cache_weltolk_sign_qq_enable, UID);
+            $return_arr = array('code' => 1, 'msg' => '保存成功!');
+        }
+        echo json_encode($return_arr);
+        die;
+    }
+}
 if ($page == 'config') {
     switch ($_GET['act']) {
         case 'ok'://成功回显
@@ -158,6 +191,18 @@ if ($page == 'config') {
 
                 $date_cache = date('Y-m-d');
 
+                $msg1 = $date_cache
+                    . "\n\n" . "Tieba-Cloud-Sign插件weltolk_sign_qq测试消息"
+                    . "\n\n" . "第1/2页";
+                $msg2 = $date_cache
+                    . "\n\n"
+                    . '!! '
+                    . ' ' . '测试百度账号'
+                    . ' 账号的 ' . '测试百度贴吧' . ' 吧: '
+                    . '签到失败' . '\n'
+                    . '!!' . ' 详细信息: ' . '签到超时'
+                    . "\n\n" . "第2/2页";
+
                 if ($x2['client'] == 'go-cqhttp') {
                     $access_token = $x2['access_token'];
 
@@ -191,10 +236,7 @@ if ($page == 'config') {
 
                         $cache_status = true;
 
-                        $send["params"]["message"] =
-                            $date_cache
-                            . "\n\n" . "Tieba-Cloud-Sign插件weltolk_sign_qq测试消息"
-                            . "\n\n" . "第1/2页";
+                        $send["params"]["message"] = $msg1;
 
                         try {
                             $send_json = json_encode($send);
@@ -220,15 +262,7 @@ if ($page == 'config') {
 
                         usleep(250000);
 
-                        $send["params"]["message"] =
-                            $date_cache
-                            . "\n\n"
-                            . '!! '
-                            . ' ' . '测试百度账号'
-                            . ' 账号的 ' . '测试百度贴吧' . ' 吧: '
-                            . '签到失败' . '\n'
-                            . '!!' . ' 详细信息: ' . '签到超时'
-                            . "\n\n" . "第2/2页";
+                        $send["params"]["message"] = $msg2;
 
                         try {
                             $send_json = json_encode($send);
@@ -293,10 +327,7 @@ if ($page == 'config') {
 
                         $cache_status = true;
 
-                        $send["message"] =
-                            $date_cache
-                            . "\n\n" . "Tieba-Cloud-Sign插件weltolk_sign_qq测试消息"
-                            . "\n\n" . "第1/2页";
+                        $send["message"] = $msg1;
 
                         $c = new wcurl($url, $headers);
                         $c->setTimeOut(5000);
@@ -314,15 +345,7 @@ if ($page == 'config') {
 
                         usleep(250000);
 
-                        $send["params"]["message"] =
-                            $date_cache
-                            . "\n\n"
-                            . '!! '
-                            . ' ' . '测试百度账号'
-                            . ' 账号的 ' . '测试百度贴吧' . ' 吧: '
-                            . '签到失败' . '\n'
-                            . '!!' . ' 详细信息: ' . '签到超时'
-                            . "\n\n" . "第2/2页";
+                        $send["params"]["message"] = $msg2;
 
                         $c = new wcurl($url, $headers);
                         $c->setTimeOut(5000);
@@ -537,9 +560,32 @@ if ($page == 'config') {
 }
 
 ?>
+    <div id="head"></div>
+
     <h2>每日签到qq推送</h2>
 
     <br/>
+    <table class="table table-striped" id="user_settings">
+        <tr id="weltolk_sign_qq_enable">
+            <td>是否开启每日签到qq推送</td>
+            <td id="values">
+                <input type="radio" name="weltolk_sign_qq_enable"
+                       value="on" <?php echo $is_open ? 'checked' : ''; ?> >开启<br/>
+                <input type="radio" name="weltolk_sign_qq_enable"
+                       value="off" <?php echo $is_open ? '' : 'checked'; ?> >关闭
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <a id="save_button" style="float: right"
+                   onclick="save_event('user_settings','save_button')"
+                   href="javascript:void(0)" class="btn btn-primary">
+                    保存设定
+                </a>
+            </td>
+        </tr>
+    </table>
 
     <!-- NAVI -->
     <ul class="nav nav-tabs" id="PageTab">
@@ -594,7 +640,7 @@ if ($page == 'config') {
                     <td id="use"><?php echo $v['type_id'] ?></td>
                     <td>
                         <a id="debug_btn<?php echo $v['id'] ?>"
-                           onclick="debun_event('addedqq<?php echo $v['id'] ?>', '<?php echo $v['id'] ?>')"
+                           onclick="debug_event('addedqq<?php echo $v['id'] ?>', '<?php echo $v['id'] ?>')"
                            href="javascript:void(0)" class="btn btn-warning">
                             测试推送</a>
                     </td>
@@ -1195,7 +1241,7 @@ if ($page == 'config') {
 
         }
 
-        function debun_event(id, id2) {
+        function debug_event(id, id2) {
             $('#debug_btn' + id2).attr('disabled', true);
             $('#debug_btn' + id2).text('正在发送');
             const args = document.getElementById(id).getElementsByTagName("td");
@@ -1232,12 +1278,70 @@ if ($page == 'config') {
                             break;
                     }
                     $('#debug_btn' + id2).attr('disabled', false);
-                    $('#debug_btn' + id2).text('点击测试');
+                    $('#debug_btn' + id2).text('测试推送');
                 },
                 error: function () {
                     alert('网络异常!请刷新页面后重试');
                     $('#debug_btn' + id2).attr('disabled', false);
-                    $('#debug_btn' + id2).text('点击测试');
+                    $('#debug_btn' + id2).text('测试推送');
+                }
+            });
+        }
+
+        function save_event(id, id2) {
+            $('#' + id2).attr('disabled', true);
+            $('#' + id2).text('正在保存');
+            const args = document.getElementById(id).getElementsByTagName("tr");
+
+            let data = {};
+            for (let i = 0; i < args.length; i++) {
+                if (args[i].id.trim() === "weltolk_sign_qq_enable") {
+                    let is_open = true;
+                    const tds = args[i].getElementsByTagName("td")
+                    for (let ii = 0; ii < tds.length; ii++) {
+                        if (tds[ii].id.trim() === "values") {
+                            const radios = tds[ii].getElementsByTagName("input");
+                            for (let iii = 0; iii < radios.length; iii++) {
+                                if (radios[iii].name === "weltolk_sign_qq_enable"
+                                    && radios[iii].checked
+                                ) {
+                                    is_open = radios[iii].value;
+                                }
+                            }
+                        }
+                    }
+
+                    data["weltolk_sign_qq_enable"] = is_open;
+                }
+            }
+            $.ajax({
+                url: 'index.php?plugin=weltolk_sign_qq&page=user_settings&act=store',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    info: JSON.stringify(data),
+                },
+                success: function (result) {
+                    switch (result.code) {
+                        case 1:
+                            document.getElementById("head").innerHTML =
+                                '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                            break;
+                        case 0:
+                            document.getElementById("head").innerHTML =
+                                '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                            break;
+                        default:
+                            alert('请求异常!请刷新页面后重试');
+                            break;
+                    }
+                    $('#' + id2).attr('disabled', false);
+                    $('#' + id2).text('保存设定');
+                },
+                error: function () {
+                    alert('网络异常!请刷新页面后重试');
+                    $('#' + id2).attr('disabled', false);
+                    $('#' + id2).text('保存设定');
                 }
             });
         }
