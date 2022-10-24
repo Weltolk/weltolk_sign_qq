@@ -3,7 +3,7 @@
 }
 /*
 Plugin Name: 每日签到结果qq推送
-Version: 1.0
+Version: 1.2
 Plugin URL: https://github.com/weltolk/weltolk_sign_qq
 Description: 每日用户签到结果qq推送，目前支持go-cqhttp的正向WebSocket和HTTP API，基于D丶L和quericy的版本重写
 Author: Weltolk
@@ -37,8 +37,19 @@ $weltolk_sign_qq_report_url = SYSTEM_URL . 'index.php?pub_plugin=weltolk_sign_qq
         <?php
     }
 
+    function weltolk_sign_qq_set_navi3()
+    {
+        ?>
+        <li><a href="index.php?mod=admin:setplug&plug=weltolk_sign_qq"><span
+                        class="glyphicon glyphicon-ban-circle"></span> 每日签到qq推送管理</a>
+        </li>
+        <?php
+    }
+
     //addAction('set_save1', 'weltolk_sign_qq_set');
+    addAction('navi_1', 'weltolk_sign_qq_set_navi');
     addAction('navi_7', 'weltolk_sign_qq_set_navi');
+    addAction('navi_3', 'weltolk_sign_qq_set_navi3');
     addAction('set_2', 'weltolk_sign_qq_setting');
     ?>
 </tr>

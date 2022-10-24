@@ -578,7 +578,7 @@ if ($page == 'config') {
     </tr>
     <tr>
         <td>
-            <a id="save_button" style="float: right"
+            <a id="save_button"
                onclick="save_event('user_settings','save_button')"
                href="javascript:void(0)" class="btn btn-primary">
                 保存设定

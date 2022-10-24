@@ -12,12 +12,11 @@ function cron_weltolk_sign_qq()
     } else {
         $zt = 'lastdo';
     }
-    $s = unserialize(option::get('plugin_weltolk_sign_qq'));
+    $limit = option::get('weltolk_sign_qq_limit');
     $date = date("Y-m-j", strtotime("-1 day"));
     $now = time();
-    $hour = date('h');
-    $y = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `nextdo` <= '{$now}' LIMIT {$s['limit']}");
-    $log = "";
+    $hour = date('H');
+    $y = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `nextdo` <= '{$now}' LIMIT {$limit}");
     while ($x = $m->fetch_array($y)) {
         $is_open = option::uget('weltolk_sign_qq_enable', $x['uid']);
         if (!$is_open) {
@@ -265,8 +264,9 @@ function cron_weltolk_sign_qq()
     }
     $log = trim($log);
     if (empty($log)) {
-        return option::get('plugin_weltolk_sign_qq_log');
+        return option::get('weltolk_sign_qq_log');
     } else {
+        option::set('weltolk_sign_qq_log', $log);
         return $log;
     }
 }

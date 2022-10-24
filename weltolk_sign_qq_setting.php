@@ -6,18 +6,14 @@ if (ROLE !== 'admin') {
     die;
 }
 
-$s = unserialize(option::get('plugin_weltolk_sign_qq'));
+$limit = option::get('weltolk_sign_qq_limit');
 
 switch ($_GET['act']) {
     case 'ok'://成功回显
         echo '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>插件设置成功</div>';
         break;
     case 'store'://保存设置
-        $set_arr = array(
-            'limit' => $_POST['limit'],
-        );
-        $set_str = serialize($set_arr);
-        option::set('plugin_weltolk_sign_qq', $set_str);
+        option::set('weltolk_sign_qq_limit', $_POST['limit']);
         ReDirect(SYSTEM_URL . 'index.php?mod=admin:setplug&plug=weltolk_sign_qq&act=ok');
         die;
     default:
@@ -38,7 +34,7 @@ switch ($_GET['act']) {
         <tbody>
         <tr>
             <td>单次计划任务连续推送次数<br/>越小效率越低，但太大也可能导致超时</td>
-            <td><input type="number" min="1" step="1" name="limit" value="<?php echo $s['limit'] ?>"
+            <td><input type="number" min="1" step="1" name="limit" value="<?php echo $limit ?>"
                        class="form-control" required></td>
         </tr>
         </tbody>
