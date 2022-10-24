@@ -265,7 +265,7 @@ function cron_weltolk_sign_qq()
     }
     $log = trim($log);
     if (empty($log)) {
-
+        return option::get('plugin_weltolk_sign_qq_log');
     } else {
         return $log;
     }

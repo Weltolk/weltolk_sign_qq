@@ -43,6 +43,7 @@ function callback_init()
     );
     $set_str = serialize($set_arr);
     option::set('plugin_weltolk_sign_qq', $set_str);
+    option::set('plugin_weltolk_sign_qq_log', "");
     //cron_tab setting
     cron::set('weltolk_sign_qq', 'plugins/weltolk_sign_qq/cron_weltolk_sign_qq.php', 0, '每日签到qq推送定时任务', 0);
 }
@@ -58,6 +59,7 @@ function callback_remove()
 {
     // plugin_option
     option::del('plugin_weltolk_sign_qq');
+    option::del('plugin_weltolk_sign_qq_log');
     //user setting
     global $m;
     $m->query("DELETE FROM `" . DB_PREFIX . "users_options` WHERE `name` = 'weltolk_sign_qq_enable'");
