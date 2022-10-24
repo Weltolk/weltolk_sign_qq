@@ -14,9 +14,10 @@ function cron_weltolk_sign_qq()
     }
     $s = unserialize(option::get('plugin_weltolk_sign_qq'));
     $date = date("Y-m-j", strtotime("-1 day"));
-    $now = strtotime(date('Y-m-d'));
+    $now = time();
     $hour = date('h');
     $y = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `nextdo` <= '{$now}' LIMIT {$s['limit']}");
+    $log = "";
     while ($x = $m->fetch_array($y)) {
         $is_open = option::uget('weltolk_sign_qq_enable', $x['uid']);
         if (!$is_open) {
@@ -159,8 +160,15 @@ function cron_weltolk_sign_qq()
                                     && $result_json["retcode"] == 0
                                     && $result_json["status"] == "ok") {
                                     $send_status = true;
+                                    $log .= date('Y-m-d') . " 成功 " . $x2["client"] . " 客户端通过 " . $x2["connect_type"] . " 方式给 "
+                                        . $x2["address"] . " 地址推送access_token为 " . $x2["access_token"]
+                                        . " 的消息: " . $x["type"] . " " . $x["type_id"] . " " . $send["params"]["message"]
+                                        . "\n";
                                 } else {
-
+                                    $log .= date('Y-m-d') . " 失败 " . $x2["client"] . " 客户端通过 " . $x2["connect_type"] . " 方式给 "
+                                        . $x2["address"] . " 地址推送access_token为 " . $x2["access_token"]
+                                        . " 的消息: " . $x["type"] . " " . $x["type_id"] . " " . $send["params"]["message"]
+                                        . "\n";
                                 }
                             } catch (\Exception $e) {
                                 echo "错误: ";
@@ -169,7 +177,7 @@ function cron_weltolk_sign_qq()
                             usleep(250000);
                         }
                         if ($send_status) {
-                            $next = strtotime(date('Y-m-d', time())) + 86400 + $x['hour'] * 3600;
+                            $next = strtotime(date('Y-m-d')) + 86400 + $x['hour'] * 3600;
                             $m->query("UPDATE `" . DB_PREFIX . "weltolk_sign_qq_target` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
                         }
                     } else if ($x2['connect_type'] == 'HTTP API') {
@@ -221,14 +229,21 @@ function cron_weltolk_sign_qq()
 //                        && $res['echo'] == $sign
                             ) {
                                 $send_status = true;
+                                $log .= date('Y-m-d') . " 成功 " . $x2["client"] . " 客户端通过 " . $x2["connect_type"] . " 方式给 "
+                                    . $x2["address"] . " 地址推送access_token为 " . $x2["access_token"]
+                                    . " 的消息: " . $x["type"] . " " . $x["type_id"] . " " . $send["params"]["message"]
+                                    . "\n";
                             } else {
-
+                                $log .= date('Y-m-d') . " 失败 " . $x2["client"] . " 客户端通过 " . $x2["connect_type"] . " 方式给 "
+                                    . $x2["address"] . " 地址推送access_token为 " . $x2["access_token"]
+                                    . " 的消息: " . $x["type"] . " " . $x["type_id"] . " " . $send["params"]["message"]
+                                    . "\n";
                             }
 
                             usleep(250000);
                         }
                         if ($send_status) {
-                            $next = strtotime(date('Y-m-d', time())) + 86400 + $x['hour'] * 3600;
+                            $next = strtotime(date('Y-m-d')) + 86400 + $x['hour'] * 3600;
                             $m->query("UPDATE `" . DB_PREFIX . "weltolk_sign_qq_target` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
                         }
 
@@ -240,12 +255,18 @@ function cron_weltolk_sign_qq()
                 }
 
             } else {
-                $next = strtotime(date('Y-m-d', time())) + $x['hour'] * 3600;
+                $next = strtotime(date('Y-m-d')) + $x['hour'] * 3600;
                 $m->query("UPDATE `" . DB_PREFIX . "weltolk_sign_qq_target` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
             }
         } else {
-            $next = strtotime(date('Y-m-d', time())) + $x['hour'] * 3600;
+            $next = strtotime(date('Y-m-d')) + $x['hour'] * 3600;
             $m->query("UPDATE `" . DB_PREFIX . "weltolk_sign_qq_target` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
         }
+    }
+    $log = trim($log);
+    if (empty($log)) {
+
+    } else {
+        return $log;
     }
 }

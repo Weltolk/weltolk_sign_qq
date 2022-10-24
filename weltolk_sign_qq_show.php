@@ -560,790 +560,790 @@ if ($page == 'config') {
 }
 
 ?>
-    <div id="head"></div>
+<div id="head"></div>
 
-    <h2>每日签到qq推送</h2>
+<h2>每日签到qq推送</h2>
+
+<br/>
+<table class="table table-striped" id="user_settings">
+    <tr id="weltolk_sign_qq_enable">
+        <td>是否开启每日签到qq推送</td>
+        <td id="values">
+            <input type="radio" name="weltolk_sign_qq_enable"
+                   value="on" <?php echo $is_open ? 'checked' : ''; ?> >开启<br/>
+            <input type="radio" name="weltolk_sign_qq_enable"
+                   value="off" <?php echo $is_open ? '' : 'checked'; ?> >关闭
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a id="save_button" style="float: right"
+               onclick="save_event('user_settings','save_button')"
+               href="javascript:void(0)" class="btn btn-primary">
+                保存设定
+            </a>
+        </td>
+    </tr>
+</table>
+
+<!-- NAVI -->
+<ul class="nav nav-tabs" id="PageTab">
+    <li class="active"><a href="#page_list" data-toggle="tab"
+                          onclick="$('#page_list').css('display','');$('#page_config').css('display','none');">推送列表</a>
+    </li>
+    <li><a href="#page_config" data-toggle="tab"
+           onclick="$('#page_list').css('display','none');$('#page_config').css('display','');">推送地址</a>
+    </li>
+</ul>
+<!-- END NAVI -->
+
+<!-- PAGE1: page_config-->
+<div class="tab-pane fade in active" id="page_list">
+    <a name="#page_list"></a>
 
     <br/>
-    <table class="table table-striped" id="user_settings">
-        <tr id="weltolk_sign_qq_enable">
-            <td>是否开启每日签到qq推送</td>
-            <td id="values">
-                <input type="radio" name="weltolk_sign_qq_enable"
-                       value="on" <?php echo $is_open ? 'checked' : ''; ?> >开启<br/>
-                <input type="radio" name="weltolk_sign_qq_enable"
-                       value="off" <?php echo $is_open ? '' : 'checked'; ?> >关闭
+    <br/>
+    <input type="button" data-toggle="modal" data-target="#addqq"
+           class="btn btn-info btn-lg" value="+ 增加推送目标"
+           style="float:right;">
+    <input type="button" data-toggle="modal" data-target="#batchqqedit"
+           onclick="batch_qq_values()"
+           class="btn btn-info btn-lg" value="* 批量/搜索 修改"
+           style="float:right;">
 
-            </td>
-        </tr>
+    <table class="table table-striped" id="qqtable">
+        <thead>
         <tr>
-            <td>
-                <a id="save_button" style="float: right"
-                   onclick="save_event('user_settings','save_button')"
-                   href="javascript:void(0)" class="btn btn-primary">
-                    保存设定
-                </a>
-            </td>
+            <th id="id">ID</th>
+            <th id="connect_id" style="width:20%">使用的推送地址</th>
+            <th id="hour" style="width:18%">每日推送时间</th>
+            <th id="type" style="width:8%">类型</th>
+            <th id="type_id" style="width:16%">号</th>
+            <th id="debug" style="width:10%"></th>
+            <th id="func" style="width:12%"></th>
+            <th id="nextdo" style="width:16%">下次推送日期</th>
+            <th id="editqq_button">修改</th>
+            <th id="delqq_button">删除</th>
         </tr>
+        </thead>
+        <tbody>
+        <?php
+        $x = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `uid` = " . UID);
+        while ($v = $m->fetch_array($x)) {
+            ?>
+            <tr id="addedqq<?php echo $v['id'] ?>">
+                <td id="use"><?php echo $v['id'] ?></td>
+                <td id="use"><?php echo $v['connect_id'] ?></td>
+                <td id="use"><?php echo $v['hour'] ?></td>
+                <td id="use"><?php echo $v['type'] ?></td>
+                <td id="use"><?php echo $v['type_id'] ?></td>
+                <td>
+                    <a id="debug_btn<?php echo $v['id'] ?>"
+                       onclick="debug_event('addedqq<?php echo $v['id'] ?>', '<?php echo $v['id'] ?>')"
+                       href="javascript:void(0)" class="btn btn-warning">
+                        测试推送</a>
+                </td>
+                <td><a href="javascript:scroll(0,0)">返回顶部</a></td>
+                <td id="use"><?php echo date('Y-m-d', $v['nextdo']) ?></td>
+                <td><a class="btn btn-default" data-toggle="modal" data-target="#editqq"
+                       onclick="edit_qq_values('addedqq<?php echo $v['id'] ?>')"
+                       title="修改"><span class="glyphicon glyphicon-edit"></span> </a></td>
+                <td><a class="btn btn-default"
+                       href="index.php?plugin=weltolk_sign_qq&page=list&act=del&id=<?php echo $v['id'] ?>&anchor=page_list"
+                       title="删除"><span class="glyphicon glyphicon-remove"></span> </a></td>
+            </tr>
+        <?php } ?>
+        </tbody>
+    </table>
+</div>
+
+<!-- END PAGE1 -->
+
+<!-- PAGE2: page_list -->
+<div class="tab-pane fade" id="page_config" style="display:none">
+    <a name="#page_config"></a>
+
+    <br/><br/>
+    <input type="button" data-toggle="modal" data-target="#addconnect"
+           class="btn btn-info btn-lg" value="+ 增加推送地址"
+           style="float:right;">
+    <input type="button" data-toggle="modal" data-target="#batchedit"
+           onclick="batch_values()"
+           class="btn btn-info btn-lg" value="* 批量/搜索 修改"
+           style="float:right;">
+
+    <table class="table table-striped" id="connecttable">
+        <thead>
+        <tr>
+            <th id="id">ID</th>
+            <th id="client" style="width:20%">qq客户端</th>
+            <th id="connect_type" style="width:20%">连接方式</th>
+            <th id="address" style="width:50%">连接地址</th>
+            <th id="access_token" style="width:10%">access_token</th>
+            <th id="editconnect_button">修改</th>
+            <th id="delconnect_button">删除</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php
+        $x = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
+        while ($v = $m->fetch_array($x)) {
+            ?>
+            <tr id="addedconnect<?php echo $v['id'] ?>">
+                <td id="use"><?php echo $v['id'] ?></td>
+                <td id="use"><?php echo $v['client'] ?></td>
+                <td id="use"><?php echo $v['connect_type'] ?></td>
+                <td id="use"><?php echo $v['address'] ?></td>
+                <td id="use">******<br/>
+                    <a href="javascript:scroll(0,0)">返回顶部</a>
+                </td>
+                <input id="addedconnect<?php echo $v['id'] ?>_access_token_hidden" type="hidden"
+                       value="<?php echo $v['access_token'] ?>">
+                <td><a class="btn btn-default" data-toggle="modal" data-target="#editconnect"
+                       onclick="edit_values('addedconnect<?php echo $v['id'] ?>')"
+                       title="修改"><span class="glyphicon glyphicon-edit"></span> </a></td>
+                <td><a class="btn btn-default"
+                       href="index.php?plugin=weltolk_sign_qq&page=config&act=del&id=<?php echo $v['id'] ?>&anchor=page_config"
+                       title="删除"><span class="glyphicon glyphicon-remove"></span> </a></td>
+            </tr>
+        <?php } ?>
+        </tbody>
     </table>
 
-    <!-- NAVI -->
-    <ul class="nav nav-tabs" id="PageTab">
-        <li class="active"><a href="#page_list" data-toggle="tab"
-                              onclick="$('#page_list').css('display','');$('#page_config').css('display','none');">推送列表</a>
-        </li>
-        <li><a href="#page_config" data-toggle="tab"
-               onclick="$('#page_list').css('display','none');$('#page_config').css('display','');">推送地址</a>
-        </li>
-    </ul>
-    <!-- END NAVI -->
+</div>
 
-    <!-- PAGE1: page_config-->
-    <div class="tab-pane fade in active" id="page_list">
-        <a name="#page_list"></a>
+<!-- END PAGE2 -->
 
-        <br/>
-        <br/>
-        <input type="button" data-toggle="modal" data-target="#addqq"
-               class="btn btn-info btn-lg" value="+ 增加推送目标"
-               style="float:right;">
-        <input type="button" data-toggle="modal" data-target="#batchqqedit"
-               onclick="batch_qq_values()"
-               class="btn btn-info btn-lg" value="* 批量/搜索 修改"
-               style="float:right;">
-
-        <table class="table table-striped" id="qqtable">
-            <thead>
-            <tr>
-                <th id="id">ID</th>
-                <th id="connect_id" style="width:20%">使用的推送地址</th>
-                <th id="hour" style="width:18%">每日推送时间</th>
-                <th id="type" style="width:8%">类型</th>
-                <th id="type_id" style="width:16%">号</th>
-                <th id="debug" style="width:10%"></th>
-                <th id="func" style="width:12%"></th>
-                <th id="nextdo" style="width:16%">下次推送日期</th>
-                <th id="editqq_button">修改</th>
-                <th id="delqq_button">删除</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            $x = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `uid` = " . UID);
-            while ($v = $m->fetch_array($x)) {
-                ?>
-                <tr id="addedqq<?php echo $v['id'] ?>">
-                    <td id="use"><?php echo $v['id'] ?></td>
-                    <td id="use"><?php echo $v['connect_id'] ?></td>
-                    <td id="use"><?php echo $v['hour'] ?></td>
-                    <td id="use"><?php echo $v['type'] ?></td>
-                    <td id="use"><?php echo $v['type_id'] ?></td>
-                    <td>
-                        <a id="debug_btn<?php echo $v['id'] ?>"
-                           onclick="debug_event('addedqq<?php echo $v['id'] ?>', '<?php echo $v['id'] ?>')"
-                           href="javascript:void(0)" class="btn btn-warning">
-                            测试推送</a>
-                    </td>
-                    <td><a href="javascript:scroll(0,0)">返回顶部</a></td>
-                    <td id="use"><?php echo date('Y-m-d', $v['nextdo']) ?></td>
-                    <td><a class="btn btn-default" data-toggle="modal" data-target="#editqq"
-                           onclick="edit_qq_values('addedqq<?php echo $v['id'] ?>')"
-                           title="修改"><span class="glyphicon glyphicon-edit"></span> </a></td>
-                    <td><a class="btn btn-default"
-                           href="index.php?plugin=weltolk_sign_qq&page=list&act=del&id=<?php echo $v['id'] ?>&anchor=page_list"
-                           title="删除"><span class="glyphicon glyphicon-remove"></span> </a></td>
-                </tr>
-            <?php } ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- END PAGE1 -->
-
-    <!-- PAGE2: page_list -->
-    <div class="tab-pane fade" id="page_config" style="display:none">
-        <a name="#page_config"></a>
-
-        <br/><br/>
-        <input type="button" data-toggle="modal" data-target="#addconnect"
-               class="btn btn-info btn-lg" value="+ 增加推送地址"
-               style="float:right;">
-        <input type="button" data-toggle="modal" data-target="#batchedit"
-               onclick="batch_values()"
-               class="btn btn-info btn-lg" value="* 批量/搜索 修改"
-               style="float:right;">
-
-        <table class="table table-striped" id="connecttable">
-            <thead>
-            <tr>
-                <th id="id">ID</th>
-                <th id="client" style="width:20%">qq客户端</th>
-                <th id="connect_type" style="width:20%">连接方式</th>
-                <th id="address" style="width:50%">连接地址</th>
-                <th id="access_token" style="width:10%">access_token</th>
-                <th id="editconnect_button">修改</th>
-                <th id="delconnect_button">删除</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            $x = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
-            while ($v = $m->fetch_array($x)) {
-                ?>
-                <tr id="addedconnect<?php echo $v['id'] ?>">
-                    <td id="use"><?php echo $v['id'] ?></td>
-                    <td id="use"><?php echo $v['client'] ?></td>
-                    <td id="use"><?php echo $v['connect_type'] ?></td>
-                    <td id="use"><?php echo $v['address'] ?></td>
-                    <td id="use">******<br/>
-                        <a href="javascript:scroll(0,0)">返回顶部</a>
-                    </td>
-                    <input id="addedconnect<?php echo $v['id'] ?>_access_token_hidden" type="hidden"
-                           value="<?php echo $v['access_token'] ?>">
-                    <td><a class="btn btn-default" data-toggle="modal" data-target="#editconnect"
-                           onclick="edit_values('addedconnect<?php echo $v['id'] ?>')"
-                           title="修改"><span class="glyphicon glyphicon-edit"></span> </a></td>
-                    <td><a class="btn btn-default"
-                           href="index.php?plugin=weltolk_sign_qq&page=config&act=del&id=<?php echo $v['id'] ?>&anchor=page_config"
-                           title="删除"><span class="glyphicon glyphicon-remove"></span> </a></td>
-                </tr>
-            <?php } ?>
-            </tbody>
-        </table>
-
-    </div>
-
-    <!-- END PAGE2 -->
-
-    <div class="modal fade" id="addconnect" tabindex="-1" role="dialog" aria-labelledby="addconnect"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="addconnect_title">添加推送地址</h4>
-                </div>
-                <form id="addconnect_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=addconnect"
-                      method="post">
-                    <div class="modal-body">
+<div class="modal fade" id="addconnect" tabindex="-1" role="dialog" aria-labelledby="addconnect"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="addconnect_title">添加推送地址</h4>
+            </div>
+            <form id="addconnect_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=addconnect"
+                  method="post">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">qq客户端</span>
+                        <input type="text" name="client" readonly class="form-control" id="addconnect_client"
+                               value="go-cqhttp">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">连接方式</span>
+                        <select name="connect_type" id="addconnect_connect_type" class="form-control">
+                            <option value="" selected hidden>
+                            </option>
+                            <option value="正向WebSocket">
+                                正向WebSocket
+                            </option>
+                            <option value="HTTP API">
+                                HTTP API
+                            </option>
+                        </select>
+                    </div>
+                    <br/>
+                    <div id="addconnect_address_list">
                         <div class="input-group">
-                            <span class="input-group-addon">qq客户端</span>
-                            <input type="text" name="client" readonly class="form-control" id="addconnect_client"
-                                   value="go-cqhttp">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">连接方式</span>
-                            <select name="connect_type" id="addconnect_connect_type" class="form-control">
-                                <option value="" selected hidden>
-                                </option>
-                                <option value="正向WebSocket">
-                                    正向WebSocket
-                                </option>
-                                <option value="HTTP API">
-                                    HTTP API
-                                </option>
-                            </select>
-                        </div>
-                        <br/>
-                        <div id="addconnect_address_list">
-                            <div class="input-group">
                                 <span class="input-group-addon">连接地址
                                     <br/><br/>（可添加多个）<br/><br/>（用回车分隔）</span>
-                                <textarea class="form-control" name="address" style="height:260px;"
-                                          id="addconnect_address" placeholder="连接地址"></textarea>
-                            </div>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">access_token</span>
-                            <input type="text" name="access_token" id="addconnect_access_token" class="form-control"
-                                   value="" placeholder="access_token">
+                            <textarea class="form-control" name="address" style="height:260px;"
+                                      id="addconnect_address" placeholder="连接地址"></textarea>
                         </div>
                     </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">access_token</span>
+                        <input type="text" name="access_token" id="addconnect_access_token" class="form-control"
+                               value="" placeholder="access_token">
                     </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="modal fade" id="addqq" tabindex="-1" role="dialog" aria-labelledby="addqq"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="addqq_title">添加推送目标</h4>
                 </div>
-                <form id="addqq_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=addqq"
-                      method="post">
-                    <div class="modal-body">
-                        <div class="input-group">
-                            <span class="input-group-addon">使用的推送地址</span>
-                            <select name="connect_id" id="addqq_connect_id" class="form-control">
-                                <option value="" selected hidden>
-                                </option>
-                                <?php
-                                $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
-                                while ($v = $m->fetch_array($x)) {
-                                    echo '<option value="' . $v['id'] . '">' . $v['id'] . '</option>';
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">每日推送时间（0-23）</span>
-                            <input type="number" name="hour" class="form-control" id="addqq_hour"
-                                   min="0" max="23" step="1"
-                                   value="0" placeholder="每日几点推送（0-23）">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">类型</span>
-                            <select name="type" id="addqq_type" class="form-control">
-                                <option value="" selected hidden>
-                                </option>
-                                <option value="群">
-                                    群
-                                </option>
-                                <option value="私聊">
-                                    私聊
-                                </option>
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
+                <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="addqq" tabindex="-1" role="dialog" aria-labelledby="addqq"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="addqq_title">添加推送目标</h4>
+            </div>
+            <form id="addqq_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=addqq"
+                  method="post">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">使用的推送地址</span>
+                        <select name="connect_id" id="addqq_connect_id" class="form-control">
+                            <option value="" selected hidden>
+                            </option>
+                            <?php
+                            $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
+                            while ($v = $m->fetch_array($x)) {
+                                echo '<option value="' . $v['id'] . '">' . $v['id'] . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">每日推送时间（0-23）</span>
+                        <input type="number" name="hour" class="form-control" id="addqq_hour"
+                               min="0" max="23" step="1"
+                               value="0" placeholder="每日几点推送（0-23）">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">类型</span>
+                        <select name="type" id="addqq_type" class="form-control">
+                            <option value="" selected hidden>
+                            </option>
+                            <option value="群">
+                                群
+                            </option>
+                            <option value="私聊">
+                                私聊
+                            </option>
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="input-group">
                             <span class="input-group-addon">号
                             <br/><br/>（可添加多个）<br/><br/>（用回车分隔）</span>
-                            <textarea class="form-control" name="type_id" style="height:260px;"
-                                      id="addqq_type_id" placeholder="群号或qq号"></textarea>
-                        </div>
+                        <textarea class="form-control" name="type_id" style="height:260px;"
+                                  id="addqq_type_id" placeholder="群号或qq号"></textarea>
                     </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
-                    </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="modal fade" id="editconnect" tabindex="-1" role="dialog" aria-labelledby="editconnect"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="editconnect_title">修改推送地址</h4>
                 </div>
-                <form id="editconnect_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=update"
-                      method="post">
-                    <div class="modal-body">
-                        <div class="input-group">
-                            <span class="input-group-addon">ID</span>
-                            <input type="text" name="id" readonly class="form-control" id="editconnect_id"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">qq客户端</span>
-                            <input type="text" name="client" readonly class="form-control" id="editconnect_client"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon" id="editconnect_connect_type_info">连接方式</span>
-                            <select name="connect_type" id="editconnect_connect_type" class="form-control">
-                            </select>
-                        </div>
-                        <br/>
-                        <div id="editconnect_address_list">
-                            <div class="input-group">
-                                <span class="input-group-addon">连接地址</span>
-                                <textarea class="form-control" name="address" style="height:260px;"
-                                          id="editconnect_address" placeholder="连接地址"></textarea>
-                            </div>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">access_token</span>
-                            <input type="text" name="access_token" id="editconnect_access_token" class="form-control"
-                                   value="" placeholder="access_token">
-                        </div>
-                        <br/>
-                    </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
-                    </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="modal fade" id="editqq" tabindex="-1" role="dialog" aria-labelledby="editconnect"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="editqq_title">修改推送目标</h4>
+                <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
                 </div>
-                <form id="editqq_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=update"
-                      method="post">
-                    <div class="modal-body">
-                        <b>日期格式为yyyy-mm-dd</b>
-                        <br/>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">ID</span>
-                            <input type="text" name="id" readonly class="form-control" id="editqq_id"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon" id="editqq_connect_id_info">使用的推送地址</span>
-                            <select name="connect_id" id="editqq_connect_id" class="form-control">
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">每日推送时间（0-23）</span>
-                            <input type="number" name="hour" class="form-control" id="editqq_hour"
-                                   min="0" max="23" step="1"
-                                   value="" placeholder="每日几点推送（0-23）">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">类型</span>
-                            <select name="type" id="editqq_type" class="form-control">
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">号</span>
-                            <textarea class="form-control" name="type_id" style="height:260px;"
-                                      id="editqq_type_id" placeholder="群号或qq号"></textarea>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">下次推送日期</span>
-                            <input type="text" class="form-control" name="nextdo"
-                                   id="editqq_nextdo" value="" placeholder="下次推送日期"/>
-                        </div>
-                    </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_list"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
-                    </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
-    <div class="modal fade" id="batchedit" tabindex="-1" role="dialog" aria-labelledby="batchedit"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="batchedit_title">批量修改推送地址</h4>
-                </div>
-                <form id="batchedit_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=batchedit"
-                      method="post">
-                    <div class="modal-body">
-                        <b>填了多个选项的情况下是判断条件都满足（条件和）</b>
-                        <br/>
-                        <br/>
+<div class="modal fade" id="editconnect" tabindex="-1" role="dialog" aria-labelledby="editconnect"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="editconnect_title">修改推送地址</h4>
+            </div>
+            <form id="editconnect_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=update"
+                  method="post">
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">ID</span>
+                        <input type="text" name="id" readonly class="form-control" id="editconnect_id"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">qq客户端</span>
+                        <input type="text" name="client" readonly class="form-control" id="editconnect_client"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="editconnect_connect_type_info">连接方式</span>
+                        <select name="connect_type" id="editconnect_connect_type" class="form-control">
+                        </select>
+                    </div>
+                    <br/>
+                    <div id="editconnect_address_list">
                         <div class="input-group">
-                            <span class="input-group-addon">要修改的qq客户端</span>
-                            <input type="text" name="client" class="form-control" id="batchedit_client"
-                                   value="">
-                            <input type="text" name="client2" class="form-control" id="batchedit_client2"
-                                   value="">
+                            <span class="input-group-addon">连接地址</span>
+                            <textarea class="form-control" name="address" style="height:260px;"
+                                      id="editconnect_address" placeholder="连接地址"></textarea>
                         </div>
-                        <br/>
-                        <div class="input-group">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">access_token</span>
+                        <input type="text" name="access_token" id="editconnect_access_token" class="form-control"
+                               value="" placeholder="access_token">
+                    </div>
+                    <br/>
+                </div>
+                <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="editqq" tabindex="-1" role="dialog" aria-labelledby="editconnect"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="editqq_title">修改推送目标</h4>
+            </div>
+            <form id="editqq_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=update"
+                  method="post">
+                <div class="modal-body">
+                    <b>日期格式为yyyy-mm-dd</b>
+                    <br/>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">ID</span>
+                        <input type="text" name="id" readonly class="form-control" id="editqq_id"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="editqq_connect_id_info">使用的推送地址</span>
+                        <select name="connect_id" id="editqq_connect_id" class="form-control">
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">每日推送时间（0-23）</span>
+                        <input type="number" name="hour" class="form-control" id="editqq_hour"
+                               min="0" max="23" step="1"
+                               value="" placeholder="每日几点推送（0-23）">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">类型</span>
+                        <select name="type" id="editqq_type" class="form-control">
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">号</span>
+                        <textarea class="form-control" name="type_id" style="height:260px;"
+                                  id="editqq_type_id" placeholder="群号或qq号"></textarea>
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">下次推送日期</span>
+                        <input type="text" class="form-control" name="nextdo"
+                               id="editqq_nextdo" value="" placeholder="下次推送日期"/>
+                    </div>
+                </div>
+                <input type="hidden" name="anchor" id="anchor" value="page_list"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="batchedit" tabindex="-1" role="dialog" aria-labelledby="batchedit"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="batchedit_title">批量修改推送地址</h4>
+            </div>
+            <form id="batchedit_form" action="index.php?plugin=weltolk_sign_qq&page=config&act=batchedit"
+                  method="post">
+                <div class="modal-body">
+                    <b>填了多个选项的情况下是判断条件都满足（条件和）</b>
+                    <br/>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的qq客户端</span>
+                        <input type="text" name="client" class="form-control" id="batchedit_client"
+                               value="">
+                        <input type="text" name="client2" class="form-control" id="batchedit_client2"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
                             <span class="input-group-addon"
                                   id="batchedit_connect_type_info">要修改的连接方式<br/><br/>支持搜索，下拉框选择和手动输入的值</span>
-                            <input name="connect_type" type="text" list="batchedit_connect_type_list"
-                                   class="form-control"
-                                   id="batchedit_connect_type" value="">
-                            <datalist id="batchedit_connect_type_list">
+                        <input name="connect_type" type="text" list="batchedit_connect_type_list"
+                               class="form-control"
+                               id="batchedit_connect_type" value="">
+                        <datalist id="batchedit_connect_type_list">
 
-                            </datalist>
-                            <select name="connect_type2" class="form-control" id="batchedit_connect_type2">
+                        </datalist>
+                        <select name="connect_type2" class="form-control" id="batchedit_connect_type2">
 
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的连接地址</span>
-                            <input type="text" name="address" class="form-control" id="batchedit_address"
-                                   value="">
-                            <input type="text" name="address2" class="form-control" id="batchedit_address2"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的access_token</span>
-                            <input type="text" name="access_token" id="batchedit_access_token" class="form-control"
-                                   value="">
-                            <input type="text" name="access_token2" id="batchedit_access_token2" class="form-control"
-                                   value="">
-                        </div>
-                        <br/>
+                        </select>
                     </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的连接地址</span>
+                        <input type="text" name="address" class="form-control" id="batchedit_address"
+                               value="">
+                        <input type="text" name="address2" class="form-control" id="batchedit_address2"
+                               value="">
                     </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
-    <div class="modal fade" id="batchqqedit" tabindex="-1" role="dialog" aria-labelledby="batchqqedit"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                    </button>
-                    <h4 class="modal-title" id="batchqqedit_title">批量修改推送目标</h4>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的access_token</span>
+                        <input type="text" name="access_token" id="batchedit_access_token" class="form-control"
+                               value="">
+                        <input type="text" name="access_token2" id="batchedit_access_token2" class="form-control"
+                               value="">
+                    </div>
+                    <br/>
                 </div>
-                <form id="batchqqedit_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=batchqqedit"
-                      method="post">
-                    <div class="modal-body">
-                        <b>填了多个选项的情况下是判断条件都满足（条件和）</b>
-                        <br/>
-                        <br/>
-                        <b>日期格式为yyyy-mm-dd</b>
-                        <br/>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的推送地址</span>
-                            <input name="connect_id" type="text" list="batchqqedit_connect_id_list"
-                                   class="form-control"
-                                   id="batchedit_connect_id" value="">
-                            <datalist id="batchqqedit_connect_id_list">
-                            </datalist>
-                            <select name="connect_id2" id="batchqqedit_connect_id2" class="form-control">
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的每日推送时间（0-23）</span>
-                            <input type="number" name="hour" class="form-control" id="batchqqedit_hour"
-                                   min="0" max="23" step="1"
-                                   value="">
-                            <input type="number" name="hour2" class="form-control" id="batchqqedit_hour2"
-                                   min="0" max="23" step="1"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的类型</span>
-                            <input name="type" type="text" list="batchqqedit_type_list"
-                                   class="form-control"
-                                   id="batchedit_type" value="">
-                            <datalist id="batchqqedit_type_list">
-                            </datalist>
-                            <select name="type2" id="batchqqedit_type2" class="form-control">
-                            </select>
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的号</span>
-                            <input type="text" name="type_id" id="batchqqedit_type_id" class="form-control"
-                                   value="">
-                            <input type="text" name="type_id2" id="batchqqedit_type_id2" class="form-control"
-                                   value="">
-                        </div>
-                        <br/>
-                        <div class="input-group">
-                            <span class="input-group-addon">要修改的下次推送日期</span>
-                            <input type="text" class="form-control" name="nextdo"
-                                   id="batchqqedit_nextdo" value=""/>
-                            <input type="text" class="form-control" name="nextdo2"
-                                   id="batchqqedit_nextdo2" value=""/>
-                        </div>
+                <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="batchqqedit" tabindex="-1" role="dialog" aria-labelledby="batchqqedit"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
+                </button>
+                <h4 class="modal-title" id="batchqqedit_title">批量修改推送目标</h4>
+            </div>
+            <form id="batchqqedit_form" action="index.php?plugin=weltolk_sign_qq&page=list&act=batchqqedit"
+                  method="post">
+                <div class="modal-body">
+                    <b>填了多个选项的情况下是判断条件都满足（条件和）</b>
+                    <br/>
+                    <br/>
+                    <b>日期格式为yyyy-mm-dd</b>
+                    <br/>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的推送地址</span>
+                        <input name="connect_id" type="text" list="batchqqedit_connect_id_list"
+                               class="form-control"
+                               id="batchedit_connect_id" value="">
+                        <datalist id="batchqqedit_connect_id_list">
+                        </datalist>
+                        <select name="connect_id2" id="batchqqedit_connect_id2" class="form-control">
+                        </select>
                     </div>
-                    <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的每日推送时间（0-23）</span>
+                        <input type="number" name="hour" class="form-control" id="batchqqedit_hour"
+                               min="0" max="23" step="1"
+                               value="">
+                        <input type="number" name="hour2" class="form-control" id="batchqqedit_hour2"
+                               min="0" max="23" step="1"
+                               value="">
                     </div>
-                </form>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的类型</span>
+                        <input name="type" type="text" list="batchqqedit_type_list"
+                               class="form-control"
+                               id="batchedit_type" value="">
+                        <datalist id="batchqqedit_type_list">
+                        </datalist>
+                        <select name="type2" id="batchqqedit_type2" class="form-control">
+                        </select>
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的号</span>
+                        <input type="text" name="type_id" id="batchqqedit_type_id" class="form-control"
+                               value="">
+                        <input type="text" name="type_id2" id="batchqqedit_type_id2" class="form-control"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">要修改的下次推送日期</span>
+                        <input type="text" class="form-control" name="nextdo"
+                               id="batchqqedit_nextdo" value=""/>
+                        <input type="text" class="form-control" name="nextdo2"
+                               id="batchqqedit_nextdo2" value=""/>
+                    </div>
+                </div>
+                <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" id="runsql_button">提交更改</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
-    <script type="application/javascript">
-        const connect_type_list = [
-            "正向WebSocket",
-            "HTTP API",
-        ];
+<script type="application/javascript">
+    const connect_type_list = [
+        "正向WebSocket",
+        "HTTP API",
+    ];
 
-        const type_list = [
-            "群",
-            "私聊",
-        ];
+    const type_list = [
+        "群",
+        "私聊",
+    ];
 
-        $(function () {
-            $('.editconnect').modal("hide");
-            $('.batchedit').modal("hide");
-            $('.editqq').modal("hide");
-        });
+    $(function () {
+        $('.editconnect').modal("hide");
+        $('.batchedit').modal("hide");
+        $('.editqq').modal("hide");
+    });
 
-        function edit_values(id) {
-            const prefix = "editconnect_";
+    function edit_values(id) {
+        const prefix = "editconnect_";
 
-            const args = document.getElementById(id).getElementsByTagName("td");
-            const names = document.getElementById("connecttable").getElementsByTagName("thead")[0]
-                .getElementsByTagName("tr")[0].getElementsByTagName("th");
+        const args = document.getElementById(id).getElementsByTagName("td");
+        const names = document.getElementById("connecttable").getElementsByTagName("thead")[0]
+            .getElementsByTagName("tr")[0].getElementsByTagName("th");
 
 
-            for (let i = 0; i < args.length; i++) {
-                if (args[i].id === "use") {
-                    if (names[i].id.trim() === "address") {
-                        document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
-                    } else if (names[i].id.trim() === "access_token") {
-                        const access_token = document.getElementById(id.trim() + "_access_token_hidden").getAttribute("value");
-                        document.getElementById(prefix + names[i].id.trim()).setAttribute("value", access_token);
-                    } else if (names[i].id.trim() === "connect_type") {
-                        let connect_type_html = "";
-                        if (connect_type_list.includes(args[i].innerHTML.trim())) {
-                            document.getElementById(prefix + "connect_type_info").innerHTML = "连接方式";
-                            connect_type_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
-                        } else {
-                            document.getElementById(prefix + "connect_type_info").innerHTML = "连接方式<br/><b>（当前连接方式已失效）</b>";
-                            connect_type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
-                        }
-                        for (let ii = 0; ii < connect_type_list.length; ii++) {
-                            connect_type_html += "<option value=\"" + connect_type_list[ii] + "\">" + connect_type_list[ii] + "</option>";
-                        }
-                        document.getElementById(prefix + names[i].id.trim()).innerHTML = connect_type_html;
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].id === "use") {
+                if (names[i].id.trim() === "address") {
+                    document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
+                } else if (names[i].id.trim() === "access_token") {
+                    const access_token = document.getElementById(id.trim() + "_access_token_hidden").getAttribute("value");
+                    document.getElementById(prefix + names[i].id.trim()).setAttribute("value", access_token);
+                } else if (names[i].id.trim() === "connect_type") {
+                    let connect_type_html = "";
+                    if (connect_type_list.includes(args[i].innerHTML.trim())) {
+                        document.getElementById(prefix + "connect_type_info").innerHTML = "连接方式";
+                        connect_type_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
                     } else {
-                        document.getElementById(prefix + names[i].id.trim()).setAttribute("value", args[i].innerHTML.trim());
+                        document.getElementById(prefix + "connect_type_info").innerHTML = "连接方式<br/><b>（当前连接方式已失效）</b>";
+                        connect_type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
                     }
-                }
-            }
-        }
-
-        function edit_qq_values(id) {
-            const prefix = "editqq_";
-
-            const args = document.getElementById(id).getElementsByTagName("td");
-            const names = document.getElementById("qqtable").getElementsByTagName("thead")[0]
-                .getElementsByTagName("tr")[0].getElementsByTagName("th");
-
-            const connect_id_list = [
-                <?php
-                $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
-                while ($v = $m->fetch_array($x)) {
-                    echo '"' . $v['id'] . '",';
-                }
-                ?>
-            ]
-
-            for (let i = 0; i < args.length; i++) {
-                if (args[i].id === "use") {
-                    if (names[i].id.trim() === "connect_id") {
-                        let connect_id_html = "";
-                        if (connect_id_list.includes(args[i].innerHTML.trim())) {
-                            connect_id_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
-                        } else {
-                            document.getElementById(prefix + "connect_id_info").innerHTML = "使用的推送地址<br/><br/>（已失效，请重新选择）";
-                            connect_id_html = "<option value=\"" + "\" selected hidden>" + "</option>";
-                        }
-                        for (let ii = 0; ii < connect_id_list.length; ii++) {
-                            connect_id_html += "<option value=\"" + connect_id_list[ii] + "\">" + connect_id_list[ii] + "</option>";
-                        }
-                        document.getElementById(prefix + names[i].id.trim()).innerHTML = connect_id_html;
-                    } else if (names[i].id.trim() === "type_id") {
-                        document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
-                    } else if (names[i].id.trim() === "type") {
-                        let type_html = "";
-                        if (type_list.includes(args[i].innerHTML.trim())) {
-                            type_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
-                        } else {
-                            type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
-                        }
-                        for (let ii = 0; ii < type_list.length; ii++) {
-                            type_html += "<option value=\"" + type_list[ii] + "\">" + type_list[ii] + "</option>";
-                        }
-                        document.getElementById(prefix + names[i].id.trim()).innerHTML = type_html;
-                    } else {
-                        document.getElementById(prefix + names[i].id.trim()).setAttribute("value", args[i].innerHTML.trim());
+                    for (let ii = 0; ii < connect_type_list.length; ii++) {
+                        connect_type_html += "<option value=\"" + connect_type_list[ii] + "\">" + connect_type_list[ii] + "</option>";
                     }
+                    document.getElementById(prefix + names[i].id.trim()).innerHTML = connect_type_html;
+                } else {
+                    document.getElementById(prefix + names[i].id.trim()).setAttribute("value", args[i].innerHTML.trim());
                 }
             }
         }
+    }
 
-        function batch_values() {
-            const prefix = "batchedit_";
+    function edit_qq_values(id) {
+        const prefix = "editqq_";
 
-            let connect_type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+        const args = document.getElementById(id).getElementsByTagName("td");
+        const names = document.getElementById("qqtable").getElementsByTagName("thead")[0]
+            .getElementsByTagName("tr")[0].getElementsByTagName("th");
 
-            for (let i = 0; i < connect_type_list.length; i++) {
-                connect_type_html += "<option value=\"" + connect_type_list[i] + "\">" + connect_type_list[i] + "</option>";
-
+        const connect_id_list = [
+            <?php
+            $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
+            while ($v = $m->fetch_array($x)) {
+                echo '"' . $v['id'] . '",';
             }
-            document.getElementById(prefix + "connect_type_list").innerHTML = connect_type_html;
-            document.getElementById(prefix + "connect_type2").innerHTML = connect_type_html;
+            ?>
+        ]
 
-        }
-
-        function batch_qq_values() {
-            const prefix = "batchqqedit_";
-
-            const connect_id_list = [
-                <?php
-                $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
-                while ($v = $m->fetch_array($x)) {
-                    echo '"' . $v['id'] . '",';
-                }
-                ?>
-            ];
-
-            let connect_id_html = "<option value=\"" + "\" selected hidden>" + "</option>";
-
-            for (let i = 0; i < connect_id_list.length; i++) {
-                connect_id_html += "<option value=\"" + connect_id_list[i] + "\">" + connect_id_list[i] + "</option>";
-
-            }
-            document.getElementById(prefix + "connect_id_list").innerHTML = connect_id_html;
-            document.getElementById(prefix + "connect_id2").innerHTML = connect_id_html;
-
-            let type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
-
-            for (let i = 0; i < type_list.length; i++) {
-                type_html += "<option value=\"" + type_list[i] + "\">" + type_list[i] + "</option>";
-
-            }
-            document.getElementById(prefix + "type_list").innerHTML = type_html;
-            document.getElementById(prefix + "type2").innerHTML = type_html;
-
-        }
-
-        function debug_event(id, id2) {
-            $('#debug_btn' + id2).attr('disabled', true);
-            $('#debug_btn' + id2).text('正在发送');
-            const args = document.getElementById(id).getElementsByTagName("td");
-            const names = document.getElementById("qqtable").getElementsByTagName("thead")[0]
-                .getElementsByTagName("tr")[0].getElementsByTagName("th");
-
-            let debug_data = {};
-            for (let i = 0; i < args.length; i++) {
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].id === "use") {
                 if (names[i].id.trim() === "connect_id") {
-                    debug_data["connect_id"] = args[i].innerHTML.trim();
-                } else if (names[i].id.trim() === "type") {
-                    debug_data["type"] = args[i].innerHTML.trim();
+                    let connect_id_html = "";
+                    if (connect_id_list.includes(args[i].innerHTML.trim())) {
+                        connect_id_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
+                    } else {
+                        document.getElementById(prefix + "connect_id_info").innerHTML = "使用的推送地址<br/><br/>（已失效，请重新选择）";
+                        connect_id_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+                    }
+                    for (let ii = 0; ii < connect_id_list.length; ii++) {
+                        connect_id_html += "<option value=\"" + connect_id_list[ii] + "\">" + connect_id_list[ii] + "</option>";
+                    }
+                    document.getElementById(prefix + names[i].id.trim()).innerHTML = connect_id_html;
                 } else if (names[i].id.trim() === "type_id") {
-                    debug_data["type_id"] = args[i].innerHTML.trim();
+                    document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
+                } else if (names[i].id.trim() === "type") {
+                    let type_html = "";
+                    if (type_list.includes(args[i].innerHTML.trim())) {
+                        type_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
+                    } else {
+                        type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+                    }
+                    for (let ii = 0; ii < type_list.length; ii++) {
+                        type_html += "<option value=\"" + type_list[ii] + "\">" + type_list[ii] + "</option>";
+                    }
+                    document.getElementById(prefix + names[i].id.trim()).innerHTML = type_html;
+                } else {
+                    document.getElementById(prefix + names[i].id.trim()).setAttribute("value", args[i].innerHTML.trim());
                 }
             }
-            $.ajax({
-                url: 'index.php?plugin=weltolk_sign_qq&page=list&act=debug&anchor=page_list',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    info: JSON.stringify(debug_data),
-                },
-                success: function (result) {
-                    switch (result.code) {
-                        case 1:
-                            alert(result.msg);
-                            break;
-                        case 0:
-                            alert(result.msg);
-                            break;
-                        default:
-                            alert('请求异常!请刷新页面后重试');
-                            break;
-                    }
-                    $('#debug_btn' + id2).attr('disabled', false);
-                    $('#debug_btn' + id2).text('测试推送');
-                },
-                error: function () {
-                    alert('网络异常!请刷新页面后重试');
-                    $('#debug_btn' + id2).attr('disabled', false);
-                    $('#debug_btn' + id2).text('测试推送');
-                }
-            });
         }
+    }
 
-        function save_event(id, id2) {
-            $('#' + id2).attr('disabled', true);
-            $('#' + id2).text('正在保存');
-            const args = document.getElementById(id).getElementsByTagName("tr");
+    function batch_values() {
+        const prefix = "batchedit_";
 
-            let data = {};
-            for (let i = 0; i < args.length; i++) {
-                if (args[i].id.trim() === "weltolk_sign_qq_enable") {
-                    let is_open = true;
-                    const tds = args[i].getElementsByTagName("td")
-                    for (let ii = 0; ii < tds.length; ii++) {
-                        if (tds[ii].id.trim() === "values") {
-                            const radios = tds[ii].getElementsByTagName("input");
-                            for (let iii = 0; iii < radios.length; iii++) {
-                                if (radios[iii].name === "weltolk_sign_qq_enable"
-                                    && radios[iii].checked
-                                ) {
-                                    is_open = radios[iii].value;
-                                }
+        let connect_type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+
+        for (let i = 0; i < connect_type_list.length; i++) {
+            connect_type_html += "<option value=\"" + connect_type_list[i] + "\">" + connect_type_list[i] + "</option>";
+
+        }
+        document.getElementById(prefix + "connect_type_list").innerHTML = connect_type_html;
+        document.getElementById(prefix + "connect_type2").innerHTML = connect_type_html;
+
+    }
+
+    function batch_qq_values() {
+        const prefix = "batchqqedit_";
+
+        const connect_id_list = [
+            <?php
+            $x = $m->query("SELECT `id` FROM `" . DB_PREFIX . "weltolk_sign_qq_connect` WHERE `uid` = " . UID);
+            while ($v = $m->fetch_array($x)) {
+                echo '"' . $v['id'] . '",';
+            }
+            ?>
+        ];
+
+        let connect_id_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+
+        for (let i = 0; i < connect_id_list.length; i++) {
+            connect_id_html += "<option value=\"" + connect_id_list[i] + "\">" + connect_id_list[i] + "</option>";
+
+        }
+        document.getElementById(prefix + "connect_id_list").innerHTML = connect_id_html;
+        document.getElementById(prefix + "connect_id2").innerHTML = connect_id_html;
+
+        let type_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+
+        for (let i = 0; i < type_list.length; i++) {
+            type_html += "<option value=\"" + type_list[i] + "\">" + type_list[i] + "</option>";
+
+        }
+        document.getElementById(prefix + "type_list").innerHTML = type_html;
+        document.getElementById(prefix + "type2").innerHTML = type_html;
+
+    }
+
+    function debug_event(id, id2) {
+        $('#debug_btn' + id2).attr('disabled', true);
+        $('#debug_btn' + id2).text('正在发送');
+        const args = document.getElementById(id).getElementsByTagName("td");
+        const names = document.getElementById("qqtable").getElementsByTagName("thead")[0]
+            .getElementsByTagName("tr")[0].getElementsByTagName("th");
+
+        let debug_data = {};
+        for (let i = 0; i < args.length; i++) {
+            if (names[i].id.trim() === "connect_id") {
+                debug_data["connect_id"] = args[i].innerHTML.trim();
+            } else if (names[i].id.trim() === "type") {
+                debug_data["type"] = args[i].innerHTML.trim();
+            } else if (names[i].id.trim() === "type_id") {
+                debug_data["type_id"] = args[i].innerHTML.trim();
+            }
+        }
+        $.ajax({
+            url: 'index.php?plugin=weltolk_sign_qq&page=list&act=debug&anchor=page_list',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                info: JSON.stringify(debug_data),
+            },
+            success: function (result) {
+                switch (result.code) {
+                    case 1:
+                        alert(result.msg);
+                        break;
+                    case 0:
+                        alert(result.msg);
+                        break;
+                    default:
+                        alert('请求异常!请刷新页面后重试');
+                        break;
+                }
+                $('#debug_btn' + id2).attr('disabled', false);
+                $('#debug_btn' + id2).text('测试推送');
+            },
+            error: function () {
+                alert('网络异常!请刷新页面后重试');
+                $('#debug_btn' + id2).attr('disabled', false);
+                $('#debug_btn' + id2).text('测试推送');
+            }
+        });
+    }
+
+    function save_event(id, id2) {
+        $('#' + id2).attr('disabled', true);
+        $('#' + id2).text('正在保存');
+        const args = document.getElementById(id).getElementsByTagName("tr");
+
+        let data = {};
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].id.trim() === "weltolk_sign_qq_enable") {
+                let is_open = true;
+                const tds = args[i].getElementsByTagName("td")
+                for (let ii = 0; ii < tds.length; ii++) {
+                    if (tds[ii].id.trim() === "values") {
+                        const radios = tds[ii].getElementsByTagName("input");
+                        for (let iii = 0; iii < radios.length; iii++) {
+                            if (radios[iii].name === "weltolk_sign_qq_enable"
+                                && radios[iii].checked
+                            ) {
+                                is_open = radios[iii].value;
                             }
                         }
                     }
+                }
 
-                    data["weltolk_sign_qq_enable"] = is_open;
-                }
+                data["weltolk_sign_qq_enable"] = is_open;
             }
-            $.ajax({
-                url: 'index.php?plugin=weltolk_sign_qq&page=user_settings&act=store',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    info: JSON.stringify(data),
-                },
-                success: function (result) {
-                    switch (result.code) {
-                        case 1:
-                            document.getElementById("head").innerHTML =
-                                '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
-                            break;
-                        case 0:
-                            document.getElementById("head").innerHTML =
-                                '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
-                            break;
-                        default:
-                            alert('请求异常!请刷新页面后重试');
-                            break;
-                    }
-                    $('#' + id2).attr('disabled', false);
-                    $('#' + id2).text('保存设定');
-                },
-                error: function () {
-                    alert('网络异常!请刷新页面后重试');
-                    $('#' + id2).attr('disabled', false);
-                    $('#' + id2).text('保存设定');
-                }
-            });
         }
-    </script>
+        $.ajax({
+            url: 'index.php?plugin=weltolk_sign_qq&page=user_settings&act=store',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                info: JSON.stringify(data),
+            },
+            success: function (result) {
+                switch (result.code) {
+                    case 1:
+                        document.getElementById("head").innerHTML =
+                            '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                        break;
+                    case 0:
+                        document.getElementById("head").innerHTML =
+                            '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                        break;
+                    default:
+                        alert('请求异常!请刷新页面后重试');
+                        break;
+                }
+                $('#' + id2).attr('disabled', false);
+                $('#' + id2).text('保存设定');
+            },
+            error: function () {
+                alert('网络异常!请刷新页面后重试');
+                $('#' + id2).attr('disabled', false);
+                $('#' + id2).text('保存设定');
+            }
+        });
+    }
+</script>
 <?php loadfoot(); ?>
