@@ -52,11 +52,15 @@ if ($page == 'config') {
             foreach ($address as $address_i) {
                 $address_i = trim($address_i);
                 if (!empty($address_i)) {
-                    $m->query("INSERT INTO `" . DB_PREFIX . "weltolk_sign_qq_connect` (`uid`, `client`, `connect_type`, `address`, `access_token` )"
-                        . " SELECT '" . UID . "', '{$client}', '{$connect_type}', '{$address_i}', '{$access_token}'"
-                        . " WHERE NOT EXISTS ( SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_connect`"
+                    $exists = $m->fetch_array($m->query(
+                        "SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_connect`"
                         . " WHERE `uid` = '" . UID . "' AND `client` = '{$client}' AND `connect_type` = '{$connect_type}'"
-                        . " AND `address` = '{$address_i}' AND `access_token` = '{$access_token}')");
+                        . " AND `address` = '{$address_i}' AND `access_token` = '{$access_token}' LIMIT 1"
+                    ));
+                    if (is_null($exists)) {
+                        $m->query("INSERT INTO `" . DB_PREFIX . "weltolk_sign_qq_connect` (`uid`, `client`, `connect_type`, `address`, `access_token` )"
+                            . " VALUES ('" . UID . "', '{$client}', '{$connect_type}', '{$address_i}', '{$access_token}')");
+                    }
                 }
             }
             ReDirect(SYSTEM_URL . 'index.php?plugin=weltolk_sign_qq&act=ok' . '#' . $anchor);
@@ -407,11 +411,15 @@ if ($page == 'config') {
             foreach ($type_id as $type_id_i) {
                 $type_id_i = trim($type_id_i);
                 if (!empty($type_id_i)) {
-                    $m->query("INSERT INTO `" . DB_PREFIX . "weltolk_sign_qq_target` (`uid`, `connect_id`, `hour`, `type`, `type_id`,`nextdo`)"
-                        . " SELECT '" . UID . "', '{$connect_id}', '{$hour}', '{$type}', '{$type_id_i}', '{$date_cache}'"
-                        . " WHERE NOT EXISTS ( SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target`"
+                    $exists = $m->fetch_array($m->query(
+                        "SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target`"
                         . " WHERE `uid` = '" . UID . "' AND `connect_id` = '{$connect_id}' AND `hour` = '{$hour}'"
-                        . " AND `type` = '{$type}' AND `type_id` = '{$type_id_i}')");
+                        . " AND `type` = '{$type}' AND `type_id` = '{$type_id_i}' LIMIT 1"
+                    ));
+                    if (is_null($exists)) {
+                        $m->query("INSERT INTO `" . DB_PREFIX . "weltolk_sign_qq_target` (`uid`, `connect_id`, `hour`, `type`, `type_id`,`nextdo`)"
+                            . " VALUES ('" . UID . "', '{$connect_id}', '{$hour}', '{$type}', '{$type_id_i}', '{$date_cache}')");
+                    }
                 }
             }
             ReDirect(SYSTEM_URL . 'index.php?plugin=weltolk_sign_qq&act=ok' . '#' . $anchor);
