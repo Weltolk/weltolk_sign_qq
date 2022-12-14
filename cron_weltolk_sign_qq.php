@@ -13,7 +13,7 @@ function cron_weltolk_sign_qq()
         $zt = 'lastdo';
     }
     $limit = option::get('weltolk_sign_qq_limit');
-    $date = date("Y-m-j", strtotime("-1 day"));
+    $date = date("Y-m-j", strtotime("now"));
     $now = time();
     $hour = date('H');
     $y = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_sign_qq_target` WHERE `nextdo` <= '{$now}' LIMIT {$limit}");
