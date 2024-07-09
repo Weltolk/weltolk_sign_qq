@@ -6,6 +6,19 @@
 
 基于quericy([https://github.com/quericy](https://github.com/quericy))的邮件推送插件修改([https://github.com/quericy/quericy_sign_mail](https://github.com/quericy/quericy_sign_mail))
 
+支持的qq客户端
+===
+
+- **Lagrange.Core/Lagrange.OneBot**
+-
+    - 支持的Lagrange.Core/Lagrange.OneBot协议:
+-
+    -
+        - HTTP API
+-
+    -
+        - 正向WebSocket
+
 安装方法
 ===
 
@@ -42,19 +55,6 @@
 - 1.云签到平台的管理员在云签到的"插件管理"页面安装并激活本插件
 
 - 2.在云签到平台菜单栏的"每日签到qq推送"里设置配置信息
-
-支持的qq客户端
-===
-
-- **go-cqhttp**
--
-    - go-cqhttp支持的协议:
--
-    -
-        - HTTP API
--
-    -
-        - 正向WebSocket
 
 许可
 ===
